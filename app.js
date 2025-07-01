@@ -1,6 +1,12 @@
 import express from "express";
+import dotenv from "dotenv";
 
+import { dbConnection} from "./config/Connection.js";
+
+dotenv.config();
 const app = express();
+
+dbConnection();
 
 app.get('/', (req,res) => {
     res.send('Hello World!')
