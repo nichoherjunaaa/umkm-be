@@ -53,5 +53,29 @@ export const getProductById = async (req, res) => {
     }
 }
 
+export const updateProduct = async (req, res) => {
+    try {
+        const productId = req.params && req.params.id;
+        if (!productId) {
+            throw new Error("Product ID is required");
+        }
+        const body = req.body;
+        if (!body) {
+            throw new Error("Request body is empty");
+        }
+        const product = await Product.findByIdAndUpdate(productId, body, { new: true }).exec();
+        if (!product) {
+            throw new Error("Product not found");
+        }
+        if (!product._id) {
+            throw new Error("Product ID is invalid");
+        }
+        res.json({ data: product, message: "Product updated" });
+    } catch (error) {
+        console.error(error);
+        res.status(400).json({ message: error.message || "An error occurred" });
+    }
+}
+
 
 
