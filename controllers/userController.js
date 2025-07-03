@@ -1,5 +1,5 @@
 import User from './../models/User.js';
-
+// import { generateToken } from '../utils/jwt.js';
 export const authRegister = async (req, res) => {
     try {
         const { email, ...rest } = req.body;
@@ -12,7 +12,7 @@ export const authRegister = async (req, res) => {
         }
         const user = new User({ email, ...rest });
         await user.save();
-        res.json({ data: user, message: "Register success" });
+        res.status(201).json({ data: user, message: "Register success" });
     } catch (error) {
         res.status(400).json({ message: error.message || "Registration failed" });
     }
@@ -21,22 +21,62 @@ export const authRegister = async (req, res) => {
 export const authLogin = async (req, res) => {
     try {
         const { email, password } = req.body;
+
         if (!email || !password) {
-            throw new Error("Email and password are required");
+            return res.status(400).json({
+                message: "Email and password are required"
+            });
         }
-        const user = await User.findOne({ email });
+
+        const user = await User.findOne({ email }).select('+password');
         if (!user) {
-            throw new Error("Invalid credentials");
+            return res.status(401).json({
+                message: "Invalid credentials"
+            });
         }
+
         const isPasswordValid = await user.comparePassword(password);
         if (!isPasswordValid) {
-            throw new Error("Invalid credentials");
+            return res.status(401).json({
+                message: "Invalid credentials"
+            });
         }
-        res.json({ data: user, message: "Login success" });
+        
+        const token = user.generateAuthToken();
+
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 24 * 60 * 60 * 1000 // 1 hari
+        });
+
+        res.status(200).json({
+            success: true,
+            token,
+            user: {
+                id: user._id,
+                name: `${user.firstname} ${user.lastname}`,
+                email: user.email,
+                role: user.role
+            }
+        });
+
     } catch (error) {
-        res.status(401).json({ message: error.message || "Login failed" });
+        console.error('Login error:', error);
+        res.status(500).json({
+            message: error.message || "Login failed"
+        });
     }
-}
+};
+
+export const authLogout = (req, res) => {
+    res.cookie('token', '', {
+        httpOnly: true,
+        expires: new Date(0)
+    });
+    res.status(200).json({ message: 'Logged out successfully' });
+};
 
 export const deleteUser = async (req, res) => {
     try {
@@ -54,7 +94,7 @@ export const deleteUser = async (req, res) => {
     }
 }
 
-export const getUsers = async(req, res) => {
+export const getUsers = async (req, res) => {
     try {
         const users = await User.find().exec();
         if (!users) {

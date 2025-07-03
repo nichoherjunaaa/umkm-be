@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from 'bcrypt';
+import { generateToken } from "../config/jwt.js";
 
 var userSchema = new mongoose.Schema({
     firstname: {
@@ -10,7 +11,7 @@ var userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    role : {
+    role: {
         type: String,
         enum: ['admin', 'user'],
         default: 'user',
@@ -47,6 +48,11 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
     } catch (error) {
         throw error;
     }
+};
+
+// Di models/User.js
+userSchema.methods.generateAuthToken = function () {
+    return generateToken(this._id, this.role);
 };
 
 export default mongoose.model('User', userSchema);
