@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
-var produdctSchema = new mongoose.Schema({
+
+var productSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
@@ -40,7 +41,6 @@ var produdctSchema = new mongoose.Schema({
         },
         comment: {
             type: String,
-            required: true,
         },
     }],
 });
