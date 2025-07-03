@@ -10,11 +10,12 @@ import transactionRouter from "./routes/transactionRoute.js";
 
 dotenv.config();
 const app = express();
-
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 dbConnection();
 
 app.get('/', (req,res) => {
-    res.send('Hello World!')
+    res.send('api ready!')
 })
 
 app.use("/api/product", productRouter);
