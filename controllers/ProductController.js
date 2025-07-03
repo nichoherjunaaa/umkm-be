@@ -36,5 +36,22 @@ export const getProducts = async (req, res) => {
     }
 }
 
+export const getProductById = async (req, res) => {
+    try {
+        const productId = req.params && req.params.id;
+        if (!productId) {
+            throw new Error("Product ID is required");
+        }
+        const product = await Product.findById(productId).exec();
+        if (!product) {
+            throw new Error("Product not found");
+        }
+        res.json({ data: product, message: "Product found" });
+    } catch (error) {
+        console.error(error);
+        res.status(400).json({ message: error.message || "An error occurred" });
+    }
+}
+
 
 
