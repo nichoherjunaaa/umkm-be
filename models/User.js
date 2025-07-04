@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from 'bcrypt';
-import { generateToken } from "../config/jwt.js";
+import { generateToken } from "../middleware/jwt.js";
 
 var userSchema = new mongoose.Schema({
     firstname: {

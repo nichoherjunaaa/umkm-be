@@ -4,7 +4,7 @@ import Product from '../models/Product.js';
 export const createTransaction = async (req, res) => {
     try {
         const {
-            userId,
+            user,
             products,
             paymentMethod,
             shippingAddress,
@@ -13,15 +13,17 @@ export const createTransaction = async (req, res) => {
             discount = 0,
         } = req.body;
 
-        if (!userId || !products || !paymentMethod || !shippingAddress || !courier) {
+        if (!user || !products || !paymentMethod || !shippingAddress || !courier) {
             return res.status(400).json({ message: 'Missing required fields' });
         }
 
         let amount = 0;
         const productDetails = [];
 
+        console.log(products);
+
         for (const item of products) {
-            const product = await Product.findById(item.productId);
+            const product = await Product.findById(item.product);
             if (!product) {
                 return res.status(404).json({ message: `Product not found: ${item.productId}` });
             }
@@ -35,25 +37,17 @@ export const createTransaction = async (req, res) => {
             const productTotal = product.price * item.quantity;
             amount += productTotal;
 
-            productDetails.push({
-                product: product._id,
-                name: product.name,
-                quantity: item.quantity,
-                price: product.price
-            });
-
             product.stock -= item.quantity;
             await product.save();
         }
 
-        const totalAmount = amount - discount + tax;
+        const totalAmount = amount - discount;
 
         const transaction = new Transaction({
-            user: userId,
-            products: productDetails,
+            user,
+            products,
             amount,
             discount,
-            tax,
             totalAmount,
             paymentMethod,
             shippingAddress,

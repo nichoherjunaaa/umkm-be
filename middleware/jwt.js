@@ -3,8 +3,8 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-very-secure-secret';
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1d';
+const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN;
 
 export const generateToken = (userId, role) => {
     return jwt.sign(
@@ -14,17 +14,14 @@ export const generateToken = (userId, role) => {
     );
 };
 
-// Verify token
 export const verifyToken = (token) => {
     return jwt.verify(token, JWT_SECRET);
 };
 
-// Middleware untuk proteksi route
 export const protect = async (req, res, next) => {
     try {
         let token;
 
-        // 1. Check token dari headers atau cookies
         if (
             req.headers.authorization &&
             req.headers.authorization.startsWith('Bearer')
@@ -40,10 +37,8 @@ export const protect = async (req, res, next) => {
             });
         }
 
-        // 2. Verifikasi token
         const decoded = verifyToken(token);
 
-        // 3. Attach user ke request object
         req.user = decoded;
         next();
     } catch (error) {
@@ -54,7 +49,6 @@ export const protect = async (req, res, next) => {
     }
 };
 
-// Middleware untuk role-based access
 export const authorize = (...roles) => {
     return (req, res, next) => {
         if (!roles.includes(req.user.role)) {
