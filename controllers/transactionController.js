@@ -140,3 +140,28 @@ export const getTransactionById = async (req, res) => {
         });
     }
 };
+
+export const getAllTransactions = async (req, res) => {
+    try {
+        const transactions = await Transaction.find()
+            .populate('user', 'name email')
+            .populate('products.product')
+            .sort({ createdAt: -1 });
+
+        if (!transactions || transactions.length === 0) {
+            return res.status(404).json({ message: 'No transactions found' });
+        }
+
+        res.status(200).json({
+            message: 'Transactions retrieved successfully',
+            data : transactions
+        });
+
+    } catch (error) {
+        console.error('Error retrieving all transactions:', error);
+        res.status(500).json({
+            message: 'Failed to retrieve transactions',
+            error: error.message
+        });
+    }
+};
