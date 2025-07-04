@@ -102,13 +102,40 @@ export const getTransactionsByUser = async (req, res) => {
 
         res.status(200).json({
             message: 'Transactions retrieved successfully',
-            transactions
+            data : transactions
         });
 
     } catch (error) {
         console.error('Error retrieving transactions:', error);
         res.status(500).json({
             message: 'Failed to retrieve transactions',
+            error: error.message
+        });
+    }
+};
+
+export const getTransactionById = async (req, res) => {
+    try {
+        const transactionId = req.params.id;
+        if (!transactionId) {
+            return res.status(400).json({ message: 'Transaction ID is required' });
+        }
+
+        const transaction = await Transaction.findById(transactionId)
+            .populate('products.product');
+
+        if (!transaction) {
+            return res.status(404).json({ message: 'Transaction not found' });
+        }
+
+        res.status(200).json({
+            message: 'Transaction retrieved successfully',
+            data : transaction
+        })
+    } catch (error) {
+        console.error('Error retrieving transaction:', error);
+        res.status(500).json({
+            message: 'Failed to retrieve transaction',
             error: error.message
         });
     }

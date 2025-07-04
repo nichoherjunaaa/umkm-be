@@ -1,8 +1,10 @@
 import express from 'express';
-import { createTransaction, getTransactionsByUser } from '../controllers/TransactionController.js';
+import { createTransaction, getTransactionById, getTransactionsByUser } from '../controllers/TransactionController.js';
 
 const router = express.Router();
 
-router.get('/:id', getTransactionsByUser);
+router.get('/user/:id', getTransactionsByUser);
+router.get('/detail/:id', getTransactionById);
 router.post('/create', createTransaction);
+
 export default router;
