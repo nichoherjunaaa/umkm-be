@@ -84,3 +84,32 @@ export const createTransaction = async (req, res) => {
         });
     }
 };
+
+export const getTransactionsByUser = async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        if (!userId) {
+            return res.status(400).json({ message: 'User ID is required' });
+        }
+
+        const transactions = await Transaction.find({ user: userId })
+            .populate('products.product')
+            .sort({ createdAt: -1 });
+
+        if (!transactions || transactions.length === 0) {
+            return res.status(404).json({ message: 'No transactions found for this user' });
+        }
+
+        res.status(200).json({
+            message: 'Transactions retrieved successfully',
+            transactions
+        });
+
+    } catch (error) {
+        console.error('Error retrieving transactions:', error);
+        res.status(500).json({
+            message: 'Failed to retrieve transactions',
+            error: error.message
+        });
+    }
+};
